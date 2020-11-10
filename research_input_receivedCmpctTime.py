@@ -39,6 +39,8 @@ def open_debug_log(collection):
     global get_height
     global get_hash
     global db_json
+
+    count = 0  # 총 몇 개를 넣었는지 출력
     
     f = open("debug.log", "r") # 파일 열기
     readPos = load_nowPos()
@@ -81,6 +83,7 @@ def open_debug_log(collection):
                 make_db_json(cmpct_height, startTime, endTime, receiveTime, cmpct_hash)
                 save_mongo_db(collection)
                 reset_value()
+                count = count + 1
                 db_json = {}
 
         except Exception as ex:
@@ -90,6 +93,7 @@ def open_debug_log(collection):
 
     nowPos = f.tell()
     save_nowPos(nowPos)
+    print_result(count)
     f.close()
 
 # 몽고 db에 저장
@@ -101,13 +105,12 @@ def save_mongo_db(collection):
 # 시간 형변환
 def change_dateTime(date, time):
     dateTime = datetime.datetime.strptime(date+" "+time, '%Y-%m-%d %H:%M:%S.%f')
-    print(dateTime)
+    
     return dateTime
 
 # 시간 계산
 def calculate_timeInterval(startTime, endTime):
     timeInterval = (endTime - startTime).total_seconds()
-
     return timeInterval
 
 # json 파일로 DB에 넣을 정보 저장
@@ -152,6 +155,13 @@ def reset_value():
     get_endTime = False
     get_height = False
     get_hash = False
+
+# 결과를 출력
+def print_result(count):
+    if count == 0:
+        print("모든 데이터가 DB에 입력 완료된 상태입니다.")
+    else :
+        print("총 " + str(count) + "개를 DB에 저장하였습니다.")
 
 #=======================================본문========================================#
 
