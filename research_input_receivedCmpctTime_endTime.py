@@ -19,7 +19,7 @@ def connect_monogoDB(collection_name):
     
     return collection
 
-# 끝나는 시간 얻어서 다시 몽고 디비에 저장하기
+# 끝나는 시간 얻어서 다시 몽고 디비에 저장하기 (저장할때 한국시간으로 변경)
 def save_endTime():
     count = 0
     origin_collection_name = "SubNode_cmpctblock_received_time_per_height"
@@ -30,7 +30,8 @@ def save_endTime():
     take_data = origin_collection.find({},{"endTime":1, "receiveTime_result":1})
     
     for time in take_data:
-        make_db_json(time['_id'], time['endTime'].strftime('%m-%d %H:%M'), time['receiveTime_result'])
+        change_time_korea = time['endTime'] + datetime.timedelta(hours=9)
+        make_db_json(time['_id'], change_time_korea.strftime('%m-%d %H:%M'), time['receiveTime_result'])
         save_mongo_db(new_collection)
         count = count + 1
     
