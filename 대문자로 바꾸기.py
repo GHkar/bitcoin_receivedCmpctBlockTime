@@ -1,0 +1,3 @@
+text = "84544e20a3b1a93d24923679131465ceb0031a0cf11d749920b7a7f948b5f698"
+
+print(text.upper())
