@@ -218,7 +218,7 @@ def open_debug_log(mycol, stored_id):
 
           
 
-                  make_db_json_cmpctblock(cmpct_height, receiveTime, stored_id, getblocktxnTime, gs_id, blocktxnTime, bs_id, reconstructedTime, res_id, startTime)
+                  make_db_json_cmpctblock(cmpct_height, receiveTime, stored_id, getblocktxnTime, gs_id, blocktxnTime, bs_id, reconstructedTime, res_id, startTime.strftime("%Y-%m-%d %H:%M:%S.%f"))
 
                   print(db_json)
 
