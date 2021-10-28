@@ -167,7 +167,7 @@ def load_pos():
 	global cur
 	# Set Parameter
 	set_id = 0
-	cur.execute("SELECT MAX(_id) FROM BCmpctTime_PerHeight")
+	cur.execute("SELECT MAX(_id) FROM BGetblocktxnInfo_PerHeight")
 	row = cur.fetchone()
 	set_id = row[0]
 
