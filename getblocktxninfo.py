@@ -5,17 +5,22 @@ import sys
 import mariadb
 import pymongo
 from pymongo import MongoClient
+from datetime import date, datetime
 
 #=======================================변수========================================#
 
 # 정규식
-pattern_getHash = re.compile(r"Initialized\sPartiallyDownloadedBlock\sfor\sblock\s(?P<hash>\w+)\s(using\sa\scmpctblock\sof\ssize\s\d+)")
+pattern_startTime = re.compile(
+    r"(?P<date>\d+[-]\d+[-]\d+)T(?P<time>\d+[:]\d+[:]\d+[.]\d+)Z\s(received:\scmpctblock\s\(\d+\sbytes\)\speer\=\d+)")
+pattern_getHash = re.compile(
+    r"Initialized\sPartiallyDownloadedBlock\sfor\sblock\s(?P<hash>\w+)\s(using\sa\scmpctblock\sof\ssize\s\d+)")
 pattern_getblocktxn = re.compile(r"(?P<date>\d+[-]\d+[-]\d+)T(?P<time>\d+[:]\d+[:]\d+[.]\d+)Z\ssending\sgetblocktxn\s\(\d+\sbytes\)\speer=\d+")
 pattern_blocktxn = re.compile(r"(?P<date>\d+[-]\d+[-]\d+)T(?P<time>\d+[:]\d+[:]\d+[.]\d+)Z\sreceived[:]\sblocktxn\s\((?P<size>\d+)\sbytes\)\speer=\d+")
 pattern_endTime = re.compile(r"(?P<date>\d+[-]\d+[-]\d+)T(?P<time>\d+[:]\d+[:]\d+[.]\d+)Z\sSuccessfully\sreconstructed\sblock\s(?P<hash>\w+)\swith\s\d+\stxn\sprefilled\,\s\d+\stxn\sfrom\smempool\s\(incl\sat\sleast\s\d+\sfrom\sextra\spool\)\sand\s(?P<rtx>\d+)\stxn\srequested")
 pattern_getHeight = re.compile(r"UpdateTip[:]\snew\sbest\=(?P<hash>\w+)\sheight[=](?P<height>\d+)\sversion\=\w+\slog2[_]work\=\d+[.]\d+\stx\=\d+\sdate\=\'\d+[-]\d+[-]\d+T\d+[:]\d+[:]\d+Z\'\sprogress\=\d+[.]\d+\scache\=\d+[.]\d+MiB\(\d+txo\)")
 
 # 값을 차례대로 얻기 위한 boolean
+get_startTime = False
 get_height = False
 get_hash = False
 get_getblocktxn = False
@@ -58,6 +63,7 @@ def connectMariaDB():
 
 # debug log read and write
 def collectData(collection):
+	global get_startTime
 	global get_height
 	global get_hash
 	global get_getblocktxn
@@ -77,6 +83,13 @@ def collectData(collection):
 	
 		
 		try:
+
+			if pattern_startTime.search(line) and not get_startTime:
+				find_line = pattern_startTime.search(line)
+				startTime = change_dateTime(
+					find_line.group('date'), find_line.group('time'))
+				get_startTime = True
+
 			if pattern_getHash.search(line) and not get_hash:
 				find_line = pattern_getHash.search(line)
 				cmpct_hash = find_line.group('hash')
@@ -89,9 +102,11 @@ def collectData(collection):
 				find_line = pattern_blocktxn.search(line)
 				gtxS = int(find_line.group('size')) - 33
 
-			if pattern_endTime.search(line) and get_getblocktxn :
+			if pattern_endTime.search(line) and get_hash :
 				find_line = pattern_endTime.search(line)
 				if find_line.group('hash') == cmpct_hash :
+					endTime = change_dateTime(find_line.group(
+                         'date'), find_line.group('time'))
 					gtxN = int(find_line.group('rtx'))
 
 			"""
@@ -109,14 +124,14 @@ def collectData(collection):
 					if get_getblocktxn is False :
 						gtxN = 0
 						gtxS = 0
-
-					make_db_json(cmpct_height, gtxN, gtxS, stored_id)
+					receiveTime = calculate_timeInterval(startTime, endTime)
+					make_db_json(cmpct_height, gtxN, gtxS, stored_id, receiveTime)
 					excuteSQL(db_json)
 					reset_value()
 					#save_maria_anl_db()
 					db_json = {}
 								
-					stored_id = stored_id + 1
+			stored_id = stored_id + 1
 		except Exception as ex:
 			print("err : " + str(ex))
 			reset_value()
@@ -127,7 +142,7 @@ def collectData(collection):
 
 def excuteSQL(info):
 	global cur
-	sql = "INSERT INTO BGetblocktxnInfo_PerHeight VALUES("+ str(info["Height"]) + "," + str(info["GetblocktxnNum"]) + "," + str(info["GetblocktxnSize"]) + "," + str(info["_id"]) + ")"
+	sql = "INSERT INTO BGetblocktxnInfo_PerHeight VALUES("+ str(info["Height"]) + "," + str(info["GetblocktxnNum"]) + "," + str(info["GetblocktxnSize"]) + "," + str(info["_id"]) + "," + str(info["CmpctTime"]) + ")"
 	cur.execute(sql)
 	dbSave()
 
@@ -144,20 +159,36 @@ def dbClose():
 
 
 
+# 시간 형변환
+
+def change_dateTime(date, time):
+   dateTime = datetime.strptime(date + " " + time, '%Y-%m-%d %H:%M:%S.%f')
+   return dateTime
+
+
+# 시간 계산
+def calculate_timeInterval(startTime, endTime):
+   timeInterval = (endTime - startTime).total_seconds()
+   return timeInterval
+
+
 # json 파일로 DB에 넣을 정보 저장
-def make_db_json(height, gtxN, gtxS, stored_id):
+def make_db_json(height, gtxN, gtxS, stored_id, time):
 	global db_json
 	db_json['Height'] = height
 	db_json['GetblocktxnNum'] = gtxN
 	db_json['GetblocktxnSize'] = gtxS
 	db_json['_id'] = stored_id
+	db_json['CmpctTime'] = time
 
 # 다시 false로 변환, 값 초기화
 def reset_value():
+	global get_startTime
 	global get_height
 	global get_hash
 	global get_getblocktxn
 	
+	get_startTime = False
 	get_height = False
 	get_hash = False
 	get_getblocktxn = False
