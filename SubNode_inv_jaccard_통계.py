@@ -61,7 +61,7 @@ def count_inv_request():
 
 def count_inv_Unrequest():
     global collection_inv
-     # 트랜잭션을 요청 블록을 불러 옴
+     # 트랜잭션을 요청하지 않은 블록을 불러 옴
     take_data = collection_inv.find({"requestTxCount" : {"$eq" : 0}, "blockTxCount" : {"$gt" : 2500, "$lt" : 3000} })
     
     tx_count1 = []
