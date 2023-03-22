@@ -1,5 +1,4 @@
-## inv 메시지 개수 비교하기
-# 전체, 요청한 것, 안한 것
+## inv 메시지 내에서 요청된 트랜잭션과 요청되지 않은 트랜잭션의 개수 세기
 
 import pymongo
 from pymongo import MongoClient
