@@ -1,26 +1,32 @@
 ## inv
-: 압축 블록 시간 측정 및 블록 관련 데이터 수집, 이후 데이터베이스(MongoDB)에 저장
+: 압축 블록의 인벤토리 메시지 관련 데이터 수집, 이후 데이터베이스(MongoDB)에 저장
 
 **파일이름**   
 사용용도_사용방법_데이터
 
   * 사용용도
-    - bcmon : bcmon 과제 코드
-    - research : 연구
+    - MainNode : 일반적인 비트코인 노드와 같이 8개 이상의 연결을 유지하며, SubNode에게 블록 및 트랜잭션을 전파하는 노드
+    - SubNode : MainNode와 직접 연결을 통해 블록 및 트랜잭션을 수신만 하는 노드
 
 
   * 사용방법
     - input : 데이터 수집
+    - remove : 특정 데이터 DB에서 삭제
 
 
   * 데이터
-    - receivedCmpctTime : 압축 블록 전달 시간
-    - blockCreateTime : 블록 생성 시간
-    - blocksize : 블록 크기
-    - mempoolTxAndblockTx : 노드의 멤풀 내 트랜잭션과 블록의 트랜잭션 비교
-    - mempoolData : 멤풀 정보
-    - mempoolTx_compare6Node : 6개 노드의 멤풀 내 트랜잭션 비교
-    - nTx : 블록의 트랜잭션 개수
-    - rTxS+rTxT : 요청한 트랜잭션 사이즈와 트랜잭션을 요청했을때 걸린 시간
-    - requestedTxnSize : 요청한 트랜잭션의 사이즈
-    - usingCacheValidatingBlock : UpdateTip 로그에 찍힌 cache (UTXO)
+    - JaccardIndex : inv 메시지 트랜잭션 유사도 분석, 자카드 지수 활용
+    - block_jaccard : inv 패킷 내의 트랜잭션과 block 내에 포함된 트랜잭션의 유사도를 분석, 자카드 지수 활용
+    - fee_size_통계 : 블록 재조립 시 요청한 트랜잭션과 요청하지 않은 트랜잭션 fee와 size 통계
+    - inv : inv 패킷 내의 트랜잭션 개수, 트랜잭션을 요청한 블록과 요청하지 않은 블록의 트랜잭션 개수 세기
+    - jaccard_통계 : inv 패킷 내의 트랜잭션, 트랜잭션을 요청한 블록과 요청하지 않은 블록의 트랜잭션의 비교 통계
+    - randomTime : 전달 받은 inv 메시지 간에 사이 시간 (랜덤 지연 영향을 받음)
+    - requestTx_afterInv : inv 메시지로 전달받은 트랜잭션 중 요청한 트랜잭션의 아이디 찾기
+    - transaction : inv 메시지 내에서 요청된 트랜잭션과 요청되지 않은 트랜잭션의 개수 세기
+    - 트랜잭션_통계 : inv 메시지 내에서 요청된 트랜잭션과 요청되지 않은 트랜잭션의 개수 통계
+    - lockTime분석 : 요청한 트랜잭션과 요청하지 않은 트랜잭션 locktime 0으로 설정된 개수
+    - receivedInv : inv 패킷 정보
+    - requestTx : 요청한 트랜잭션 리스트 저장
+    - tx_fee : 트랜잭션 fee
+    
+    
