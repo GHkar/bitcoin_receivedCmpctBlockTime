@@ -1,5 +1,4 @@
-## inv 메시지 개수 비교하기
-# 전체, 요청한 것, 안한 것
+## inv 메시지로 전달받은 트랜잭션 중 요청한 트랜잭션의 아이디 찾기
 
 import pymongo
 from pymongo import MongoClient
