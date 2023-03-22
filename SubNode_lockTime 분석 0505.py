@@ -1,4 +1,4 @@
-## 요청한 트랜잭션과 요청하지 않은 트랜잭션 fee와 size 추가 통계 0505-0506
+## 요청한 트랜잭션과 요청하지 않은 트랜잭션 locktime 0으로 설정된 개수
 
 import pymongo
 from pymongo import MongoClient
@@ -31,7 +31,6 @@ def connect_mongoDB():
 
 # 요청한 트랜잭션 리스트 만들기
 def find_request_Tx(collection):
-     # 트랜잭션을 요청한 블록을 불러 옴
     take_data = collection.find({})
     rtx_list = []
     for td in take_data:
@@ -46,7 +45,7 @@ def calculate_size_fee_statistic():
     global collection_rtx
 
     rtx_list = find_request_Tx(collection_rtx)
-     # 트랜잭션을 요청한 블록을 불러 옴
+     # 요청한 트랜잭션을 불러옴
     take_data = collection_txFeeSize.find({})
 
     # 요청한 트랜잭션 reqeust
