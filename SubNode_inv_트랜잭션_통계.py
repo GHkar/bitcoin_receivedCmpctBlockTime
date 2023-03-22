@@ -1,5 +1,4 @@
-## inv 메시지 개수 비교하기
-# 전체, 요청한 것, 안한 것
+## 
 
 import pymongo
 from pymongo import MongoClient
@@ -57,7 +56,7 @@ def count_inv_request():
 
 def count_inv_Unrequest():
     global collection_inv
-     # 트랜잭션을 요청한 블록을 불러 옴
+     # 트랜잭션을 요청하지 않은 블록을 불러 옴
     take_data = collection_inv.find({"requestTxCount" : {"$eq" : 0}})
     
     tx_count = []
